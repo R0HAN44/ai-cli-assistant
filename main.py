@@ -22,7 +22,7 @@ def main():
             print("🔄 Conversation reset! Starting fresh...")
             continue
         add_message(session_id, "user", user_input)
-        history = get_history(session_id)
+        # history = get_history(session_id)
         response = ask_ai(user_input, history)
         add_message(session_id, "assistant", response)
         print("\nAI Response:\n", response)
