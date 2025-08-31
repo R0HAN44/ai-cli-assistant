@@ -5,19 +5,17 @@ import uuid
 from config import get_api_key
 
 # --- Initialize Chroma client ---
-chroma_client = chromadb.Client()
+chroma_client = chromadb.PersistentClient(path="./chroma_db")
 
 # Create (or get) collection
-collection = chroma_client.get_or_create_collection(
-    name="chat_history_collection"
-)
+collection = chroma_client.get_or_create_collection("my_collection")
 
 # --- Initialize Gemini embedder ---
 genai_client = genai.Client(api_key=get_api_key())
 
 def get_gemini_embedding(text: str):
     try:
-        print("Inside embedding function")
+        # print("Inside embedding function")
         res = genai_client.models.embed_content(
             model="text-embedding-004",  # Updated model name
             contents=[{
@@ -25,7 +23,7 @@ def get_gemini_embedding(text: str):
             }],
             config=EmbedContentConfig(task_type="RETRIEVAL_DOCUMENT")
         )
-        print("Embedding API response received",res.embeddings[0].values)
+        # print("Embedding API response received",res.embeddings[0].values)
         return res.embeddings[0].values
     except Exception as e:
         print(f"Error getting embedding: {e}")
@@ -37,7 +35,7 @@ def get_gemini_embedding(text: str):
 def add_message(session_id: str, role: str, content: str):
     try:
         vector = get_gemini_embedding(content)
-        print("calling embedding API")
+        # print("calling embedding API")
         doc_id = str(uuid.uuid4())
 
         collection.add(
@@ -86,3 +84,6 @@ def reset_session(session_id: str):
         collection.delete(where={"session_id": session_id})
     except Exception as e:
         print(f"Error resetting session: {e}")
+
+def print_collection():
+    print(collection.peek())
