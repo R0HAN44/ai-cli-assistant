@@ -1,7 +1,7 @@
 from ai_client import ask_ai
 from utils import copy_to_clipboard
 from chromaUtil import add_message, get_history, reset_session, print_collection
-from tools import create_file, run_command, delete_file
+from tools import create_file, run_command, delete_file, read_file
 
 session_id = "default_session"
 
@@ -40,21 +40,41 @@ def testFunc():
     print("press 1 for creating file")
     print("press 2 for running command")
     print("press 3 for deleting file")
+    print("press 4 for reading file")
 
     while True:
-        choice = input("Enter your choice (1/2/3): ")
+        choice = input("Enter your choice (1/2/3/4): ")
         if choice == "1":
             file_path = input("Enter the file path: ")
             content = input("Enter the file content: ")
-            create_file(file_path, content)
-            print(f"File created at: {file_path}")
+            result = create_file(file_path, content)
+            if result["status"] == "success":
+                print(f"File created at: {file_path}")
+            else:
+                print(f"Error creating file: {result['error']}")
         elif choice == "2":
             command = input("Enter the command to run: ")
-            run_command(command.split())
+            result = run_command(command.split())
+            if result["status"] == "success":
+                print(f"Command output:\n{result['output']}")
+            else:
+                print(f"Error running command: {result['error']}")
         elif choice == "3":
             file_path = input("Enter the file path to delete: ")
-            delete_file(file_path)
-            print(f"File deleted at: {file_path}")
+            result = delete_file(file_path)
+            if result["status"] == "success":
+                print(f"File deleted at: {file_path}")
+            else:
+                print(f"Error deleting file: {result['error']}")
+        elif choice == "4":
+            file_path = input("Enter the file path to read: ")
+            start_line = int(input("Enter the start line (1-indexed): "))
+            end_line = int(input("Enter the end line (1-indexed): "))
+            result = read_file(file_path, start_line, end_line)
+            if result["status"] == "success":
+                print(f"File content from lines {start_line} to {end_line}:\n{result['output']}")
+            else:
+                print(f"Error reading file: {result['error']}")
         else:
             print("Invalid choice. Please try again.")
 

@@ -47,6 +47,52 @@ def create_file(filepath: str, content: str):
             "path": full_path,
             "error": str(e)
         }
+    
+def read_file(filepath: str, start_line: int, end_line: int):
+    """Read a file inside the workspace from start_line to end_line (1-indexed, inclusive)."""
+    if not os.path.isdir(WORKSPACE):
+        return {
+            "status": "error",
+            "action": "read_file",
+            "error": "Workspace does not exist."
+        }
+
+    full_path = os.path.join(WORKSPACE, filepath)
+
+    if not os.path.abspath(full_path).startswith(os.path.abspath(WORKSPACE)):
+        return {
+            "status": "error",
+            "action": "read_file",
+            "path": full_path,
+            "error": "File path must be inside the workspace."
+        }
+    
+    if not os.path.isfile(full_path):
+        return {
+            "status": "error",
+            "action": "read_file",
+            "path": full_path,
+            "error": "File does not exist."
+        }
+
+    try:
+        with open(full_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            selected_lines = lines[start_line - 1:end_line]
+            content = "".join(selected_lines)
+        return {
+            "status": "success",
+            "action": "read_file",
+            "path": full_path,
+            "output": content
+        }
+    except OSError as e:
+        return {
+            "status": "error",
+            "action": "read_file",
+            "path": full_path,
+            "error": str(e)
+        }
 
 def delete_file(filepath: str):
     """Delete a file inside the workspace."""
