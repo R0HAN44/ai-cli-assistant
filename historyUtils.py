@@ -2,7 +2,10 @@ import json
 import os
 
 WORKSPACE = "workspace_project"
-HISTORY_FILE = "history.json"
+HISTORY_FILE = os.path.join(WORKSPACE, "history.json")
+
+# Ensure workspace directory exists
+os.makedirs(WORKSPACE, exist_ok=True)
 
 def add_message_to_history(messageObj):
     """Add a message object (role + content) to the history file in JSON format."""

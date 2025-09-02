@@ -151,7 +151,8 @@ def run_command(command: list):
 
     base_cmd = command[0]
     args = command[1:]
-
+    print("base command:", base_cmd)
+    print("arguments:", args)
     if base_cmd not in ALLOWED_COMMANDS:
         return {
             "status": "error",
@@ -168,19 +169,36 @@ def run_command(command: list):
         }
 
     try:
-        result = subprocess.run(
+        print("FINAL COMMAND", command)
+        process = subprocess.Popen(
             command,
             cwd=WORKSPACE,
-            capture_output=True,
-            text=True,
-            check=True
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
         )
-        return {
-            "status": "success",
-            "action": "run_command",
-            "command": " ".join(command),
-            "output": result.stdout.strip()
-        }
+
+        captured_output = []
+        for line in process.stdout:
+            print(line, end="")   # print live to terminal
+            captured_output.append(line)
+
+        process.wait()
+
+        if process.returncode == 0:
+            return {
+                "status": "success",
+                "action": "run_command",
+                "command": " ".join(command),
+                "output": "".join(captured_output).strip()
+            }
+        else:
+            return {
+                "status": "error",
+                "action": "run_command",
+                "command": " ".join(command),
+                "error": "".join(captured_output).strip()
+            }
     except subprocess.CalledProcessError as e:
         return {
             "status": "error",
